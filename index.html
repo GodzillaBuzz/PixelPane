@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PixelPane | Next-Gen Roblox UI Studio</title>
+<style>
+:root {
+  --ink: #000000;
+  --muted: #8e8e93;
+  --line: rgba(0, 0, 0, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.7);
+  --glass-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --soft: #f2f2f7;
+  --blue: #007aff;
+  --green: #34c759;
+  --orange: #ff9500;
+  --red: #ff3b30;
+  --gold: #ffcc00;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: radial-gradient(circle at 10% 20%, rgba(220, 235, 255, 0.7) 0%, rgba(245, 245, 250, 0.9) 50%, rgba(255, 230, 240, 0.5) 100%), #f5f5f7;
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: var(--font);
+  line-height: 1.45;
+  letter-spacing: -0.018em;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; outline: none; }
+
+/* iOS Glass Card Standard */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(25px) saturate(190%);
+  -webkit-backdrop-filter: blur(25px) saturate(190%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: 26px;
+}
+
+/* iOS Spring Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: #000; color: #fff; border: 0; border-radius: 980px;
+  padding: 13px 26px; font: 600 15px/1 var(--font); cursor: pointer;
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.15s, background 0.2s, box-shadow 0.2s;
+  -webkit-tap-highlight-color: transparent; user-select: none;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+}
+.btn:hover { transform: scale(1.03); opacity: 0.95; box-shadow: 0 8px 22px rgba(0,0,0,0.18); }
+.btn:active { transform: scale(0.94); opacity: 0.75; }
+.btn.sm { padding: 8px 18px; font-size: 13.5px; }
+.btn.block { width: 100%; }
+.btn.ghost { background: rgba(0,0,0,0.05); color: #000; box-shadow: none; }
+.btn.ghost:hover { background: rgba(0,0,0,0.09); }
+.btn.accent { background: var(--blue); color: #fff; box-shadow: 0 4px 16px rgba(0, 122, 255, 0.35); }
+.btn.accent:hover { box-shadow: 0 8px 24px rgba(0, 122, 255, 0.5); }
+.btn.success { background: var(--green); color: #fff; box-shadow: 0 4px 16px rgba(52, 199, 89, 0.35); }
+.btn.danger { background: var(--red); color: #fff; }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+/* Sticky Glass Header */
+header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: saturate(200%) blur(25px);
+  -webkit-backdrop-filter: saturate(200%) blur(25px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+.bar {
+  max-width: 1140px; margin: 0 auto; padding: 0 24px; height: 64px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.logo { font-weight: 800; font-size: 18px; letter-spacing: -0.02em; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.logo-icon {
+  width: 28px; height: 28px; background: linear-gradient(135deg, #007aff, #5856d6);
+  border-radius: 9px; display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 900; font-size: 15px; box-shadow: 0 4px 12px rgba(0,122,255,0.4);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.logo:hover .logo-icon { transform: rotate(12deg) scale(1.1); }
+
+/* iOS Segmented Nav */
+.nav { display: flex; background: rgba(120, 120, 128, 0.12); padding: 3px; border-radius: 12px; gap: 2px; }
+.nav a {
+  padding: 6px 16px; border-radius: 9px; font-size: 14px; font-weight: 500;
+  color: #555; cursor: pointer; transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.nav a:hover { color: #000; }
+.nav a.active { color: #000; background: #fff; font-weight: 600; box-shadow: 0 3px 12px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08); }
+.badge {
+  display: inline-flex; min-width: 18px; height: 18px; padding: 0 6px; margin-left: 6px;
+  border-radius: 980px; background: var(--red); color: #fff; font-size: 11px; font-weight: 700;
+  align-items: center; justify-content: center;
+}
+
+/* Views Container */
+main { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+.view { display: none; padding: 48px 0 96px; animation: iosSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+.view.show { display: block; }
+@keyframes iosSlideUp { from { opacity: 0; transform: translateY(18px) scale(0.98); } to { opacity: 1; transform: none; } }
+
+.lbl { font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--blue); font-weight: 700; margin-bottom: 12px; }
+h1.big { font-size: clamp(38px, 5.5vw, 64px); line-height: 1.04; letter-spacing: -0.045em; font-weight: 800; }
+.lead { font-size: 20px; color: #6e6e73; max-width: 34em; margin: 20px 0 32px; font-weight: 400; line-height: 1.4; }
+.row { display: flex; gap: 12px; flex-wrap: wrap; }
+.fine { font-size: 13.5px; color: var(--muted); margin-top: 18px; }
+h2.t { font-size: clamp(28px, 4vw, 44px); letter-spacing: -0.038em; font-weight: 800; line-height: 1.1; }
+.sec { margin-top: 100px; }
+.sub { color: var(--muted); font-size: 18px; margin: 10px 0 32px; max-width: 36em; }
+
+/* Hero Section */
+.hero { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; align-items: center; }
+.hero-img-wrap {
+  position: relative; border-radius: 32px; overflow: hidden;
+  box-shadow: 0 30px 70px -15px rgba(0,0,0,0.25);
+  transform-style: preserve-3d; transition: transform 0.3s ease-out;
+}
+.hero-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s ease; }
+.hero-img-wrap:hover img { transform: scale(1.05); }
+
+/* Interactive Cards */
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.card {
+  padding: 32px 28px; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative; overflow: hidden;
+}
+.card:hover { transform: translateY(-8px); }
+.card h3 { font-size: 21px; letter-spacing: -0.02em; margin-bottom: 8px; font-weight: 700; }
+.card p { color: var(--muted); font-size: 15px; line-height: 1.5; }
+.card .n { font-size: 13px; color: var(--blue); font-weight: 800; display: block; margin-bottom: 12px; letter-spacing: 0.05em; }
+
+/* Showcase Grid */
+.showcase-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-top: 32px; }
+.showcase-card {
+  border-radius: 28px; overflow: hidden; transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative; cursor: pointer;
+}
+.showcase-card:hover { transform: translateY(-8px) scale(1.01); box-shadow: 0 30px 60px rgba(0,0,0,0.15); }
+.showcase-img { width: 100%; height: 230px; object-fit: cover; display: block; border-bottom: 1px solid var(--line); }
+.showcase-body { padding: 24px; }
+.showcase-body h3 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+.showcase-body p { color: var(--muted); font-size: 14.5px; }
+.tag-pill { display: inline-block; padding: 4px 12px; border-radius: 980px; background: rgba(0,122,255,0.1); font-size: 12px; font-weight: 700; color: var(--blue); margin-bottom: 12px; }
+
+/* Switcher */
+.tog { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+.sw { display: flex; align-items: center; gap: 14px; margin: 24px 0; font-weight: 600; }
+.sw button {
+  width: 52px; height: 32px; border-radius: 16px; border: 0; background: #e9e9ea;
+  position: relative; cursor: pointer; transition: background 0.3s;
+}
+.sw button::after {
+  content: ""; position: absolute; top: 2px; left: 2px; width: 28px; height: 28px;
+  border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.sw button[aria-pressed=true] { background: var(--green); }
+.sw button[aria-pressed=true]::after { transform: translateX(20px); }
+.prev { border-radius: 28px; padding: 40px; display: flex; align-items: center; justify-content: center; min-height: 250px; transition: all 0.4s; }
+.prev .ui {
+  padding: 18px 38px; border-radius: 16px; font-weight: 800; font-size: 22px; background: #e2e2e7; color: #555;
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer; user-select: none;
+}
+.prev .ui:active { transform: scale(0.92); }
+.prev.on { background: #0c1021; }
+.prev.on .ui {
+  background: linear-gradient(160deg, #ffd24a, #ff9f1c); color: #2b1a00; border-radius: 980px;
+  box-shadow: 0 10px 0 #b8680a, 0 18px 30px rgba(0,0,0,0.4); text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+}
+
+/* Comparison Table */
+.tw { overflow-x: auto; margin-top: 24px; }
+.tbl { width: 100%; border-collapse: collapse; min-width: 560px; }
+.tbl th, .tbl td { padding: 18px 20px; text-align: left; border-bottom: 1px solid var(--line); }
+.tbl th { font-size: 13.5px; color: var(--muted); font-weight: 600; }
+.tbl .us { background: rgba(0,122,255,0.06); font-weight: 700; color: var(--blue); }
+
+/* FAQ Accordion */
+.faq { border-radius: 26px; padding: 10px 24px; max-width: 840px; }
+.faq details { border-bottom: 1px solid var(--line); padding: 18px 0; }
+.faq details:last-child { border-bottom: 0; }
+.faq summary { font-weight: 600; font-size: 17.5px; cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: ""; width: 8px; height: 8px; border-right: 2.5px solid var(--muted); border-bottom: 2.5px solid var(--muted); transform: rotate(-45deg); transition: transform 0.3s; flex: none; }
+.faq details[open] summary::after { transform: rotate(45deg); }
+.faq p { color: var(--muted); margin-top: 12px; max-width: 38em; font-size: 15.5px; line-height: 1.5; }
+
+/* Call to Action */
+.cta { margin-top: 100px; background: #000; color: #fff; border-radius: 36px; padding: 64px 32px; text-align: center; box-shadow: 0 30px 60px rgba(0,0,0,0.2); }
+.cta h2 { font-size: clamp(28px, 4vw, 44px); letter-spacing: -0.03em; margin-bottom: 24px; }
+.cta .btn { background: #fff; color: #000; }
+
+/* Pricing Tier Cards */
+.tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 40px; }
+.tier {
+  border-radius: 32px; padding: 36px 28px; display: flex; flex-direction: column; position: relative;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
+}
+.tier:hover { transform: translateY(-8px); box-shadow: 0 25px 50px rgba(0,0,0,0.15); }
+.tier h3 { font-size: 14px; font-weight: 800; letter-spacing: 0.06em; }
+.price { font-size: 52px; font-weight: 800; letter-spacing: -0.045em; margin: 12px 0 2px; }
+.price small { font-size: 16px; font-weight: 600; letter-spacing: 0; }
+.per { font-size: 14px; margin-bottom: 24px; color: var(--muted); }
+.tier ul { list-style: none; margin-bottom: 30px; flex: 1; }
+.tier li { padding: 12px 0; font-size: 15px; border-top: 1px solid var(--line); display: flex; gap: 10px; align-items: center; }
+.tier li::before { content: "✓"; font-weight: 800; color: var(--green); }
+.free { background: rgba(255,255,255,0.7); color: #000; }
+.pro { background: linear-gradient(145deg, #fff3b0, #f2b705 50%, #c9a227); color: #2b2100; box-shadow: 0 20px 40px -15px rgba(201,162,39,0.5); }
+.pro .per { color: #5c4806; }
+.pro li::before { color: #000; }
+.max { background: #0c1021; color: #f6dc82; border: 1.5px solid var(--gold); }
+.max .per { color: #bfa24a; }
+.max .price { background: linear-gradient(90deg, #f6dc82, #c9a227); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.max .btn { background: linear-gradient(90deg, #f6dc82, #c9a227); color: #000; }
+.tag { position: absolute; top: 20px; right: 20px; font-size: 11.5px; font-weight: 800; background: #000; color: var(--gold); padding: 5px 12px; border-radius: 980px; }
+
+/* Inset Grouped Orders & Owner Control */
+.group-title { font-size: 14px; font-weight: 800; color: var(--muted); margin: 28px 0 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+.group { border-radius: 24px; overflow: hidden; background: rgba(255,255,255,0.5); }
+.order { padding: 20px 24px; border-bottom: 1px solid var(--line); display: block; transition: background 0.2s; }
+.order:last-child { border-bottom: 0; }
+.order:hover { background: rgba(255,255,255,0.8); }
+.otop { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.order .l { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.dot { width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 17px; flex: none; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+.dot.free { background: #e5e5ea; color: #333; }
+.dot.pro { background: var(--gold); color: #000; }
+.dot.max { background: #000; color: var(--gold); }
+.order b { font-size: 17px; font-weight: 700; display: block; }
+.order .meta { font-size: 13.5px; color: var(--muted); display: block; margin-top: 2px; }
+.right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex: none; }
+.pill { font-size: 12.5px; font-weight: 800; padding: 5px 14px; border-radius: 980px; letter-spacing: 0.02em; }
+.pill.activated { background: rgba(52,199,89,0.16); color: #1f9d44; }
+.pill.waiting { background: rgba(255,149,0,0.16); color: #c77700; }
+.pill.expired { background: rgba(255,59,48,0.16); color: #d70015; }
+.timer-badge { font-size: 13px; font-weight: 700; color: var(--blue); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+.oact { display: flex; gap: 10px; margin-top: 16px; padding-top: 14px; border-top: 1px dashed rgba(0,0,0,0.1); }
+.empty { text-align: center; padding: 60px 20px; border-radius: 24px; color: var(--muted); }
+
+/* Owner Admin Section */
+.admin-card { padding: 28px; margin-bottom: 28px; }
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px; }
+.stat-box { background: rgba(255,255,255,0.6); padding: 18px; border-radius: 18px; border: 1px solid var(--line); text-align: center; }
+.stat-box b { font-size: 26px; font-weight: 800; display: block; color: var(--blue); }
+.stat-box span { font-size: 13px; color: var(--muted); font-weight: 600; }
+
+/* Filter Tabs */
+.filter-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+.filter-btn { padding: 6px 14px; border-radius: 980px; font-size: 13px; font-weight: 600; background: rgba(0,0,0,0.05); border: 0; cursor: pointer; transition: all 0.2s; }
+.filter-btn.active { background: #000; color: #fff; }
+
+/* Modal Sheet & Overlay */
+.ov { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 300; }
+.ov.on { display: flex; }
+.modal { padding: 32px; width: 100%; max-width: 440px; position: relative; animation: modalPop 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes modalPop { from { opacity: 0; transform: scale(0.92) translateY(20px); } to { opacity: 1; transform: none; } }
+.modal h3 { font-size: 24px; letter-spacing: -0.02em; font-weight: 800; }
+.sum { display: flex; justify-content: space-between; background: rgba(0,0,0,0.04); border-radius: 16px; padding: 16px 20px; margin: 20px 0; font-size: 16px; }
+.modal label { font-size: 13.5px; font-weight: 700; display: block; margin-bottom: 8px; }
+.modal input { width: 100%; font: 16px var(--font); padding: 14px 18px; background: rgba(0,0,0,0.05); border: 2px solid transparent; border-radius: 14px; margin-bottom: 8px; outline: 0; transition: all 0.2s; }
+.modal input:focus { background: #fff; border-color: var(--blue); box-shadow: 0 0 0 4px rgba(0,122,255,0.15); }
+.modal small { color: var(--muted); display: block; margin-bottom: 22px; font-size: 13.5px; line-height: 1.4; }
+.x { position: absolute; top: 20px; right: 20px; width: 32px; height: 32px; border-radius: 50%; background: rgba(0,0,0,0.06); border: 0; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+.x:hover { background: rgba(0,0,0,0.12); }
+
+/* iOS Toast Notification */
+.toast {
+  position: fixed; left: 50%; bottom: 32px; transform: translate(-50%, 140px);
+  background: rgba(0,0,0,0.88); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  color: #fff; padding: 14px 28px; border-radius: 980px; font-weight: 600; font-size: 15px;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); z-index: 400;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 10px;
+}
+.toast.on { transform: translate(-50%, 0); }
+
+/* Mobile Bottom Tabbar */
+.tabbar { display: none; }
+footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; padding: 40px 24px; text-align: center; margin-top: 80px; }
+footer a { margin: 0 12px; cursor: pointer; font-weight: 500; } footer a:hover { color: #000; }
+
+#confettiCanvas { position: fixed; inset: 0; pointer-events: none; z-index: 500; }
+
+@media(max-width: 860px) {
+  body { padding-bottom: 84px; }
+  .hero, .cards, .tiers, .tog { grid-template-columns: 1fr; }
+  .bar .nav { display: none; }
+  .tabbar {
+    display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 200;
+    background: rgba(255,255,255,0.8); backdrop-filter: saturate(200%) blur(25px); -webkit-backdrop-filter: saturate(200%) blur(25px);
+    border-top: 1px solid rgba(0,0,0,0.12); padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px));
+  }
+  .tabbar a {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+    font-size: 10.5px; font-weight: 600; color: #8e8e93; cursor: pointer; position: relative;
+  }
+  .tabbar svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+  .tabbar a.active { color: var(--blue); }
+  .tabbar .badge { position: absolute; top: -2px; left: calc(50% + 6px); margin: 0; }
+  .ov { align-items: flex-end; padding: 0; }
+  .modal { max-width: none; border-radius: 32px 32px 0 0; padding: 28px 24px calc(32px + env(safe-area-inset-bottom, 0px)); }
+  .toast { bottom: 98px; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="confettiCanvas"></canvas>
+
+<header>
+  <div class="bar">
+    <a class="logo" data-go="home">
+      <div class="logo-icon">P</div>
+      <span>PixelPane</span>
+    </a>
+    <nav class="nav" aria-label="Main Navigation">
+      <a data-go="home" data-v="home" class="active">Home</a>
+      <a data-go="gallery" data-v="gallery">Examples</a>
+      <a data-go="subscriptions" data-v="subscriptions">Plans</a>
+      <a data-go="orders" data-v="orders">Orders <span class="badge cnt" hidden>0</span></a>
+      <a data-go="owner" data-v="owner" style="color: var(--blue);">Owner Admin <span class="badge owner-badge" hidden style="background:var(--orange)">0</span></a>
+    </nav>
+    <div style="display:flex; gap:8px;">
+      <button class="btn sm ghost" id="demoOrderBtn" title="Creates a simulated order for quick testing">⚡ Quick Test Order</button>
+      <button class="btn sm accent" data-go="subscriptions">Buy Now</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- HOME VIEW -->
+  <section class="view show" id="home">
+    <div class="hero">
+      <div>
+        <p class="lbl">Native Roblox Studio GUI Engine</p>
+        <h1 class="big">UI Design built in for Roblox Studio.</h1>
+        <p class="lead">We transform game menus into smooth, responsive, liquid glass experiences. Receive ready-to-use <code>Figma Link</code> sized in Scale.</p>
+        <div class="row">
+          <button class="btn accent" data-go="subscriptions">Browse Subscription Plans</button>
+          <button class="btn ghost" data-go="gallery">Explore Interface Showcase</button>
+        </div>
+        <p class="fine">✦ Zero access required to your game file · Pay monthly in Robux</p>
+      </div>
+      <div class="hero-img-wrap glass-panel" id="tiltHero">
+        <img src="hero.png" alt="Roblox Game Interface Preview">
+      </div>
+    </div>
+
+    <!-- FEATURED SHOWCASE EXAMPLES -->
+    <div class="sec">
+      <p class="lbl">Dynamic Showcase</p>
+      <h2 class="t">Crafted for Top Roblox Experiences</h2>
+      <p class="sub">Tap any interface below to preview responsive physics, layout scaling, and glossy iOS elements.</p>
+      
+      <div class="showcase-grid">
+        <div class="showcase-card glass-panel" onclick="showToast('⚡ Sci-Fi HUD Loaded in Preview');">
+          <img src="img1.png" alt="Cyberpunk RPG HUD" class="showcase-img">
+          <div class="showcase-body">
+            <span class="tag-pill">RPG & Sci-Fi</span>
+            <h3>Neon Sci-Fi HUD & Health Gauge</h3>
+            <p>Dynamic stamina bars, health meters, weapon hotbars, and circular radar frames.</p>
+          </div>
+        </div>
+        <div class="showcase-card glass-panel" onclick="showToast('✨ Pet Simulator Store Loaded');">
+          <img src="img2.png" alt="Simulator Store UI" class="showcase-img">
+          <div class="showcase-body">
+            <span class="tag-pill">Simulator</span>
+            <h3>Glossy Pet Shop & Inventory Grid</h3>
+            <p>Glass inventory grid with rarity tags, tile selections, and Robux purchase dialogs.</p>
+          </div>
+        </div>
+        <div class="showcase-card glass-panel" onclick="showToast('⚙️ Settings Menu Loaded');">
+          <img src="img3.png" alt="Settings Menu UI" class="showcase-img">
+          <div class="showcase-body">
+            <span class="tag-pill">iOS Minimalist</span>
+            <h3>Apple Settings & Keybind Panel</h3>
+            <p>Clean segmented controls, smooth keybind toggles, and multi-device scaling constraints.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <div class="sec">
+      <p class="lbl">Workflow</p>
+      <h2 class="t">How PixelPane Delivers</h2>
+      <div class="cards" style="margin-top:36px">
+        <div class="card glass-panel">
+          <span class="n">01 / BRIEF</span>
+          <h3>Submit Brief</h3>
+          <p>Send your game theme, color palettes, or reference menu screenshots.</p>
+        </div>
+        <div class="card glass-panel">
+          <span class="n">02 / APPROVE</span>
+          <h3>Approve Mockup</h3>
+          <p>Review interactive iOS-styled previews and request revisions before file generation.</p>
+        </div>
+        <div class="card glass-panel">
+          <span class="n">03 / IMPORT</span>
+          <h3>Drop in Studio</h3>
+          <p>Drag your <code>.rbxm</code> file straight into <code>StarterGui</code> with all scripts pre-wired.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- DYNAMIC STYLE TOGGLE -->
+    <div class="sec tog">
+      <div>
+        <p class="lbl">Style Switcher</p>
+        <h2 class="t">Flat Minimalist vs. Chunky 3D Glass</h2>
+        <p class="sub" style="margin-bottom:0">Flip the iOS switch to preview button physics, shadows, and gloss effects in real time.</p>
+        <div class="sw">
+          <span>Flat</span>
+          <button id="sw" aria-pressed="false" aria-label="Toggle style mode"></button>
+          <span>Glossy 3D</span>
+        </div>
+      </div>
+      <div class="prev glass-panel" id="prev">
+        <div class="ui" id="previewButton" onclick="triggerConfetti(); showToast('🎉 Button Pressed!');">Claim Reward</div>
+      </div>
+    </div>
+
+    <!-- COMPARISON TABLE -->
+    <div class="sec">
+      <p class="lbl">Comparison</p>
+      <h2 class="t">Why Top Roblox Creators Choose Us</h2>
+      <div class="tw">
+        <table class="tbl glass-panel">
+          <thead>
+            <tr><th>Feature</th><th class="us">PixelPane</th><th>Freelancers</th><th>Manual DIY</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Pricing</td><td class="us">From 0 Robux</td><td>2,000+ Robux</td><td>Your Time</td></tr>
+            <tr><td>Delivery Time</td><td class="us">1 to 2 Days</td><td>5 to 10 Days</td><td>Weeks</td></tr>
+            <tr><td>Scripts Included</td><td class="us">Pre-wired Lua</td><td>Rarely</td><td>Write Yourself</td></tr>
+            <tr><td>Mobile Scaled</td><td class="us">Native Scale & Aspect</td><td>Inconsistent</td><td>Manual Tweaks</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="sec">
+      <p class="lbl">Questions & Answers</p>
+      <h2 class="t" style="margin-bottom:24px">Frequently Asked Questions</h2>
+      <div class="faq glass-panel">
+        <details>
+          <summary>How does the Owner activation process work?</summary>
+          <p>After you purchase a subscription plan, you are redirected to the external site for payment (if required), and your order appears in your Account Orders tab. Once the owner verifies payment and clicks <b>Bought It</b>, your subscription activates immediately with a 30-day countdown timer!</p>
+        </details>
+        <details>
+          <summary>Do I need to give team-create access to my game?</summary>
+          <p>No. We deliver standalone <code>.rbxm</code> model files that you drop directly into Roblox Studio.</p>
+        </details>
+        <details>
+          <summary>Are the UI components responsive on Mobile and Console?</summary>
+          <p>Yes. Every component uses relative Scale positioning and <code>UIAspectRatioConstraint</code> objects to fit phones, tablets, PCs, and Xbox/PlayStation screens perfectly.</p>
+        </details>
+      </div>
+    </div>
+
+    <div class="cta">
+      <h2>Transform Your Roblox Game Menu Today</h2>
+      <button class="btn accent" data-go="subscriptions">Choose a Subscription Plan</button>
+    </div>
+  </section>
+
+  <!-- GALLERY VIEW -->
+  <section class="view" id="gallery">
+    <p class="lbl">Examples Showcase</p>
+    <h1 class="big">Interface Design Portfolio</h1>
+    <p class="lead">Explore high-converting Roblox Studio UI kits crafted by PixelPane.</p>
+
+    <div class="showcase-grid" style="margin-top: 40px;">
+      <div class="showcase-card glass-panel">
+        <img src="img4.png" alt="Inventory Grid UI" class="showcase-img">
+        <div class="showcase-body">
+          <span class="tag-pill">Inventory System</span>
+          <h3>Modern Trading & Item Grid</h3>
+          <p>Equipped item slots, filter tags, search bar, and item detail popup panels.</p>
+        </div>
+      </div>
+      <div class="showcase-card glass-panel">
+        <img src="img5.png" alt="Leaderboard & Stats" class="showcase-img">
+        <div class="showcase-body">
+          <span class="tag-pill">Leaderboards</span>
+          <h3>Global Rank & Player Stats Board</h3>
+          <p>Real-time player avatar thumbnails, prestige badges, and animated scrolling frames.</p>
+        </div>
+      </div>
+      <div class="showcase-card glass-panel">
+        <img src="img6.png" alt="Battlepass UI" class="showcase-img">
+        <div class="showcase-body">
+          <span class="tag-pill">Monetization</span>
+          <h3>Season Pass & Daily Rewards Track</h3>
+          <p>Free and Premium reward tier tracks with claim animation hooks built-in.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUBSCRIPTIONS VIEW -->
+  <section class="view" id="subscriptions">
+    <p class="lbl">Subscription Tiers</p>
+    <h1 class="big">Pick Your Subscription</h1>
+    <p class="lead">Unlock premium Roblox Studio UI kits and custom design services.</p>
+    
+    <div class="tiers">
+      <article class="tier free glass-panel">
+        <h3>FREE PLAN</h3>
+        <div class="price">0 <small>Robux</small></div>
+        <div class="per">Monthly</div>
+        <ul>
+          <li>3 Starter StarterGui Templates</li>
+          <li>Basic Setup Documentation</li>
+          <li>Community Discord Access</li>
+        </ul>
+        <button class="btn block ghost" data-plan="Free" data-price="0" data-link="">Get Started Free</button>
+      </article>
+
+      <article class="tier pro glass-panel">
+        <span class="tag">POPULAR</span>
+        <h3>PRO PLAN</h3>
+        <div class="price">200 <small>Robux</small></div>
+        <div class="per">Monthly</div>
+        <ul>
+          <li>25 Premium Studio UI Kits</li>
+          <li>Shop & Inventory Systems</li>
+          <li>Mobile & Console Layout Support</li>
+          <li>Direct Email & Discord Support</li>
+        </ul>
+        <!-- PRO PLAN SPECIFIC LINK -->
+        <button class="btn block accent" data-plan="Pro" data-price="200" data-link="https://www.roblox.com/game-pass/2053972936">Subscribe Pro (200 R$)</button>
+      </article>
+
+      <article class="tier max glass-panel">
+        <span class="tag">BEST VALUE</span>
+        <h3>MAX PLAN</h3>
+        <div class="price">800 <small>Robux</small></div>
+        <div class="per">Monthly</div>
+        <ul>
+          <li>Everything included in Pro</li>
+          <li>1 Custom Built UI For Your Game</li>
+          <li>Priority 24/7 Turnaround</li>
+          <li>Lifetime Kit Updates</li>
+        </ul>
+        <!-- MAX PLAN SPECIFIC LINK -->
+        <button class="btn block" data-plan="Max" data-price="800" data-link="https://www.roblox.com/game-pass/2053570928">Subscribe Max (800 R$)</button>
+      </article>
+    </div>
+  </section>
+
+  <!-- USER ORDERS VIEW -->
+  <section class="view" id="orders">
+    <p class="lbl">Account Management</p>
+    <h1 class="big">Your Subscription Orders</h1>
+    <p class="lead">Track your orders, payment redirection, and active 30-day countdowns below.</p>
+    <div class="orders" id="userOrderList" style="margin-top:28px"></div>
+  </section>
+
+  <!-- OWNER ADMIN PANEL VIEW -->
+  <section class="view" id="owner">
+    <p class="lbl">Owner Control Center</p>
+    <h1 class="big">Owner Admin Panel</h1>
+    <p class="lead">Manage customer subscriptions, view Roblox usernames, and activate purchases.</p>
+
+    <div class="admin-card glass-panel">
+      <!-- Unauthenticated State -->
+      <div id="ownerAuthSection">
+        <h3 style="font-size: 20px; font-weight:800; margin-bottom: 8px;">Owner Authentication Required</h3>
+        <p style="font-size: 14.5px; color: var(--muted); margin-bottom: 20px;">Enter your Owner Security Key to manage orders and activate subscriptions.</p>
+        <div style="display:flex; gap:12px; max-width:440px;">
+          <input type="password" id="ownerKeyInput" placeholder="Security Key" style="flex:1; padding:12px 16px; border-radius:14px; border:1px solid var(--line); font-size:15px; outline:none; background:rgba(0,0,0,0.04);">
+          <button class="btn accent" id="ownerLoginBtn">Authenticate</button>
+        </div>
+      </div>
+
+      <!-- Authenticated State -->
+      <div id="ownerLoggedSection" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div>
+            <span style="display:inline-block; padding:5px 14px; background:rgba(52,199,89,0.16); color:var(--green); font-size:12.5px; font-weight:800; border-radius:980px;">AUTHENTICATED OWNER</span>
+            <p style="font-size:14px; color:var(--muted); margin-top:6px;">Owner permissions active. Click <b>"Bought It"</b> on any pending order to activate client 30-day subscriptions.</p>
+          </div>
+          <button class="btn sm danger" id="ownerLogoutBtn">Log Out</button>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-box">
+            <b id="statTotal">0</b>
+            <span>Total Orders</span>
+          </div>
+          <div class="stat-box">
+            <b id="statPending" style="color:var(--orange);">0</b>
+            <span>Pending Activation</span>
+          </div>
+          <div class="stat-box">
+            <b id="statActive" style="color:var(--green);">0</b>
+            <span>Active Subscriptions</span>
+          </div>
+        </div>
+
+        <div style="margin-top:32px;">
+          <div class="filter-bar">
+            <button class="filter-btn active" data-filter="all">All Orders</button>
+            <button class="filter-btn" data-filter="waiting">Waiting Payment</button>
+            <button class="filter-btn" data-filter="activated">Active</button>
+            <button class="filter-btn" data-filter="expired">Expired</button>
+          </div>
+          <div id="ownerOrderList"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- MOBILE TABBAR NAVIGATION -->
+<nav class="tabbar">
+  <a data-go="home" class="active">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+    Home
+  </a>
+  <a data-go="gallery">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+    Examples
+  </a>
+  <a data-go="subscriptions">
+    <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+    Plans
+  </a>
+  <a data-go="orders">
+    <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+    Orders <span class="badge cnt" hidden>0</span>
+  </a>
+  <a data-go="owner">
+    <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+    Owner
+  </a>
+</nav>
+
+<!-- ORDER CHECKOUT MODAL -->
+<div class="ov" id="checkoutModal">
+  <div class="modal glass-panel">
+    <button class="x" id="closeModalBtn">&times;</button>
+    <h3 id="modalPlanTitle">Subscribe Plan</h3>
+    <div class="sum">
+      <span>Subscription Total:</span>
+      <b id="modalPlanPrice">0 Robux</b>
+    </div>
+    <form id="orderForm">
+      <label for="robloxUser">Roblox Username</label>
+      <input type="text" id="robloxUser" placeholder="e.g. Builderman" required autocomplete="off">
+      <small>Your username is required so the Owner can verify your Robux Gamepass purchase.</small>
+      <button type="submit" class="btn accent block" style="font-size:16px;">Confirm & Continue to Payment</button>
+    </form>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span id="toastMsg">Action completed!</span>
+</div>
+
+<footer>
+  <p>© 2026 PixelPane Studio. All rights reserved.</p>
+  <p style="margin-top:10px;">
+    <a data-go="home">Home</a> · 
+    <a data-go="gallery">Showcase</a> · 
+    <a data-go="subscriptions">Subscription Tiers</a> · 
+    <a data-go="owner">Owner Admin</a>
+  </p>
+</footer>
+
+<!-- COMPLETE JAVASCRIPT LOGIC -->
+<script>
+// --- GLOBAL APPLICATION STATE ---
+let orders = JSON.parse(localStorage.getItem('pixelpane_orders') || '[]');
+let selectedPlan = null;
+let isOwnerLoggedIn = localStorage.getItem('pixelpane_owner_logged') === 'true';
+const OWNER_PASS = "admin123"; // Owner login password
+let activeFilter = 'all';
+
+// --- INITIALIZATION ---
+document.addEventListener('DOMContentLoaded', () => {
+  initNavigation();
+  initModal();
+  initStyleToggle();
+  initOwnerAdmin();
+  renderOrders();
+  startTimerLoop();
+});
+
+// --- NAVIGATION CONTROLLER ---
+function initNavigation() {
+  document.querySelectorAll('[data-go]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      const targetView = el.getAttribute('data-go');
+      switchView(targetView);
+    });
+  });
+}
+
+function switchView(viewId) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('show'));
+  const target = document.getElementById(viewId);
+  if (target) target.classList.add('show');
+
+  // Update Nav highlighting
+  document.querySelectorAll('.nav a, .tabbar a').forEach(a => {
+    if (a.getAttribute('data-go') === viewId) {
+      a.classList.add('active');
+    } else {
+      a.classList.remove('active');
+    }
+  });
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// --- CHECKOUT & ORDER LOGIC ---
+function initModal() {
+  const modal = document.getElementById('checkoutModal');
+  const closeBtn = document.getElementById('closeModalBtn');
+  const form = document.getElementById('orderForm');
+
+  // Attach plan button click handlers
+  document.querySelectorAll('[data-plan]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const plan = btn.getAttribute('data-plan');
+      const price = btn.getAttribute('data-price');
+      const link = btn.getAttribute('data-link');
+
+      selectedPlan = { plan, price, link };
+
+      document.getElementById('modalPlanTitle').innerText = `Subscribe to ${plan} Plan`;
+      document.getElementById('modalPlanPrice').innerText = `${price} Robux / mo`;
+      modal.classList.add('on');
+    });
+  });
+
+  closeBtn.addEventListener('click', () => modal.classList.remove('on'));
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.classList.remove('on');
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const username = document.getElementById('robloxUser').value.trim();
+    if (!username) return;
+
+    // Create New Order
+    const newOrder = {
+      id: 'ORD-' + Math.floor(100000 + Math.random() * 900000),
+      username: username,
+      plan: selectedPlan.plan,
+      price: selectedPlan.price,
+      link: selectedPlan.link,
+      status: selectedPlan.price == 0 ? 'activated' : 'waiting', // Free plans auto-activate
+      created: Date.now(),
+      expiresAt: selectedPlan.price == 0 ? Date.now() + (30 * 24 * 60 * 60 * 1000) : null
+    };
+
+    orders.unshift(newOrder);
+    saveOrders();
+
+    modal.classList.remove('on');
+    document.getElementById('robloxUser').value = '';
+
+    // If external link exists (Pro / Max), open link in new tab
+    if (selectedPlan.link) {
+      window.open(selectedPlan.link, '_blank');
+      showToast(`Redirecting to ${selectedPlan.plan} Gamepass... Order created!`);
+    } else {
+      showToast(`Order created for ${newOrder.plan} Plan!`);
+    }
+
+    switchView('orders');
+    renderOrders();
+  });
+
+  // Quick Test Order Button
+  document.getElementById('demoOrderBtn').addEventListener('click', () => {
+    const demoOrder = {
+      id: 'ORD-' + Math.floor(100000 + Math.random() * 900000),
+      username: 'TestUser_' + Math.floor(Math.random() * 1000),
+      plan: 'Pro',
+      price: 200,
+      link: 'https://www.roblox.com/game-pass/2053972936',
+      status: 'waiting',
+      created: Date.now(),
+      expiresAt: null
+    };
+    orders.unshift(demoOrder);
+    saveOrders();
+    renderOrders();
+    showToast('⚡ Quick Test Order Created!');
+  });
+}
+
+function saveOrders() {
+  localStorage.setItem('pixelpane_orders', JSON.stringify(orders));
+  updateBadges();
+}
+
+function updateBadges() {
+  const pendingCount = orders.filter(o => o.status === 'waiting').length;
+  document.querySelectorAll('.cnt, .owner-badge').forEach(badge => {
+    badge.innerText = pendingCount;
+    badge.hidden = pendingCount === 0;
+  });
+}
+
+// --- RENDER USER & OWNER ORDERS ---
+function renderOrders() {
+  updateBadges();
+  renderUserOrders();
+  renderOwnerOrders();
+}
+
+function renderUserOrders() {
+  const container = document.getElementById('userOrderList');
+  if (orders.length === 0) {
+    container.innerHTML = `<div class="empty glass-panel"><h3>No Active Subscriptions</h3><p>Choose a plan to get started with PixelPane UI kits.</p></div>`;
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="group-title">Active & Recent Orders (${orders.length})</div>
+    <div class="group glass-panel">
+      ${orders.map(o => renderOrderHTML(o, false)).join('')}
+    </div>
+  `;
+}
+
+function renderOwnerOrders() {
+  const container = document.getElementById('ownerOrderList');
+  if (!container) return;
+
+  // Filter Logic
+  let filtered = orders;
+  if (activeFilter !== 'all') {
+    filtered = orders.filter(o => o.status === activeFilter);
+  }
+
+  // Update Statistics
+  document.getElementById('statTotal').innerText = orders.length;
+  document.getElementById('statPending').innerText = orders.filter(o => o.status === 'waiting').length;
+  document.getElementById('statActive').innerText = orders.filter(o => o.status === 'activated').length;
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="empty" style="padding:40px;">No orders found for filter: "${activeFilter}"</div>`;
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="group glass-panel" style="margin-top:16px;">
+      ${filtered.map(o => renderOrderHTML(o, true)).join('')}
+    </div>
+  `;
+}
+
+function renderOrderHTML(order, isOwnerView) {
+  const isExpired = order.expiresAt && Date.now() > order.expiresAt;
+  const status = isExpired ? 'expired' : order.status;
+  const planClass = order.plan.toLowerCase();
+
+  let statusPill = '';
+  if (status === 'activated') statusPill = `<span class="pill activated">✓ ACTIVE</span>`;
+  else if (status === 'waiting') statusPill = `<span class="pill waiting">⏳ WAITING PAYMENT</span>`;
+  else if (status === 'expired') statusPill = `<span class="pill expired">✕ EXPIRED</span>`;
+
+  let timerContent = '';
+  if (status === 'activated' && order.expiresAt) {
+    const diff = order.expiresAt - Date.now();
+    timerContent = `<div class="timer-badge" data-expire="${order.expiresAt}">⏱️ ${formatTimeRemaining(diff)}</div>`;
+  }
+
+  let ownerControls = '';
+  if (isOwnerView && status === 'waiting') {
+    ownerControls = `
+      <div class="oact">
+        <button class="btn sm success" onclick="activateOrder('${order.id}')">✓ Bought It (Activate 30 Days)</button>
+        <button class="btn sm danger" onclick="deleteOrder('${order.id}')">Delete</button>
+      </div>
+    `;
+  } else if (isOwnerView) {
+    ownerControls = `
+      <div class="oact">
+        <button class="btn sm danger" onclick="deleteOrder('${order.id}')">Delete Record</button>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="order">
+      <div class="otop">
+        <div class="l">
+          <div class="dot ${planClass}">${order.plan.charAt(0)}</div>
+          <div>
+            <b>${order.plan} Plan — ${order.price} Robux</b>
+            <span class="meta">User: <strong>@${order.username}</strong> · ID: ${order.id}</span>
+          </div>
+        </div>
+        <div class="right">
+          ${statusPill}
+          ${timerContent}
+        </div>
+      </div>
+      ${ownerControls}
+    </div>
+  `;
+}
+
+// --- OWNER ACTIONS ---
+function initOwnerAdmin() {
+  const authSec = document.getElementById('ownerAuthSection');
+  const loggedSec = document.getElementById('ownerLoggedSection');
+  const loginBtn = document.getElementById('ownerLoginBtn');
+  const logoutBtn = document.getElementById('ownerLogoutBtn');
+  const keyInput = document.getElementById('ownerKeyInput');
+
+  function updateOwnerUI() {
+    if (isOwnerLoggedIn) {
+      authSec.style.display = 'none';
+      loggedSec.style.display = 'block';
+      renderOwnerOrders();
+    } else {
+      authSec.style.display = 'block';
+      loggedSec.style.display = 'none';
+    }
+  }
+
+  loginBtn.addEventListener('click', () => {
+    if (keyInput.value === OWNER_PASS) {
+      isOwnerLoggedIn = true;
+      localStorage.setItem('pixelpane_owner_logged', 'true');
+      updateOwnerUI();
+      showToast('🔑 Owner Authenticated Successfully');
+      keyInput.value = '';
+    } else {
+      showToast('❌ Incorrect Security Key');
+    }
+  });
+
+  logoutBtn.addEventListener('click', () => {
+    isOwnerLoggedIn = false;
+    localStorage.setItem('pixelpane_owner_logged', 'false');
+    updateOwnerUI();
+    showToast('Logged out of Owner Panel');
+  });
+
+  // Filter Buttons
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilter = btn.getAttribute('data-filter');
+      renderOwnerOrders();
+    });
+  });
+
+  updateOwnerUI();
+}
+
+function activateOrder(orderId) {
+  const order = orders.find(o => o.id === orderId);
+  if (order) {
+    order.status = 'activated';
+    order.expiresAt = Date.now() + (30 * 24 * 60 * 60 * 1000); // 30 Days from now
+    saveOrders();
+    renderOrders();
+    triggerConfetti();
+    showToast(`🎉 Order ${orderId} activated for 30 days!`);
+  }
+}
+
+function deleteOrder(orderId) {
+  if (confirm('Are you sure you want to delete this order record?')) {
+    orders = orders.filter(o => o.id !== orderId);
+    saveOrders();
+    renderOrders();
+    showToast('Order record removed');
+  }
+}
+
+// --- TIMERS & COUNTDOWN LOOP ---
+function startTimerLoop() {
+  setInterval(() => {
+    document.querySelectorAll('[data-expire]').forEach(el => {
+      const expireTime = parseInt(el.getAttribute('data-expire'), 10);
+      const remaining = expireTime - Date.now();
+      if (remaining <= 0) {
+        el.innerText = "⏱️ Expired";
+        renderOrders();
+      } else {
+        el.innerText = `⏱️ ${formatTimeRemaining(remaining)}`;
+      }
+    });
+  }, 1000);
+}
+
+function formatTimeRemaining(ms) {
+  if (ms <= 0) return "00d 00h 00m";
+  const seconds = Math.floor((ms / 1000) % 60);
+  const minutes = Math.floor((ms / (1000 * 60)) % 60);
+  const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
+  const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+  return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+}
+
+// --- STYLE SWITCHER TOGGLE ---
+function initStyleToggle() {
+  const sw = document.getElementById('sw');
+  const prev = document.getElementById('prev');
+
+  sw.addEventListener('click', () => {
+    const isPressed = sw.getAttribute('aria-pressed') === 'true';
+    sw.setAttribute('aria-pressed', !isPressed);
+    if (!isPressed) {
+      prev.classList.add('on');
+    } else {
+      prev.classList.remove('on');
+    }
+  });
+}
+
+// --- UTILITY: TOAST & CONFETTI ---
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastMsg').innerText = msg;
+  toast.classList.add('on');
+  setTimeout(() => toast.classList.remove('on'), 3000);
+}
+
+function triggerConfetti() {
+  const canvas = document.getElementById('confettiCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const particles = Array.from({ length: 70 }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height - canvas.height,
+    color: ['#007aff', '#34c759', '#ff9500', '#ff3b30', '#ffcc00'][Math.floor(Math.random() * 5)],
+    size: Math.random() * 8 + 4,
+    speedY: Math.random() * 5 + 3,
+    speedX: Math.random() * 2 - 1
+  }));
+
+  let frame = 0;
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      p.y += p.speedY;
+      p.x += p.speedX;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    frame++;
+    if (frame < 120) requestAnimationFrame(animate);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  animate();
+}
+</script>
+</body>
+</html>
